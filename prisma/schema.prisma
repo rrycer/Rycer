@@ -22,6 +22,7 @@ model User {
 
   exercises Exercise[]
   workouts  Workout[]
+  routines  Routine[]
 }
 
 // --- Workouts module (the "Strong" replacement) ---------------------------
@@ -40,6 +41,7 @@ model Exercise {
   createdAt DateTime @default(now())
 
   workoutExercises WorkoutExercise[]
+  routineExercises RoutineExercise[]
 
   @@unique([userId, name])
   @@index([userId])
@@ -73,6 +75,38 @@ model WorkoutExercise {
   sets WorkoutSet[]
 
   @@index([workoutId])
+  @@index([exerciseId])
+}
+
+// A reusable plan (e.g. "Push Day") that gets instantiated into a Workout
+// when you start a session, rather than building the exercise list from
+// scratch every time.
+model Routine {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exercises RoutineExercise[]
+
+  @@index([userId])
+}
+
+model RoutineExercise {
+  id         String   @id @default(cuid())
+  routineId  String
+  routine    Routine  @relation(fields: [routineId], references: [id], onDelete: Cascade)
+  exerciseId String
+  exercise   Exercise @relation(fields: [exerciseId], references: [id], onDelete: Restrict)
+  order      Int // position within the routine, 0-based
+  targetSets Int? // e.g. 3
+  targetReps String? // free text: "8-12", "AMRAP", "5", etc.
+  notes      String?
+
+  @@index([routineId])
   @@index([exerciseId])
 }
 
