@@ -1,8 +1,13 @@
-export default function MeasurePage() {
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold">Measure</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Coming next.</p>
-    </div>
-  );
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/current-user";
+import { MeasureView } from "@/components/measure/measure-view";
+
+export default async function MeasurePage() {
+  const user = await getCurrentUser();
+  const entries = await db.bodyWeightEntry.findMany({
+    where: { userId: user.id },
+    orderBy: { date: "desc" },
+  });
+
+  return <MeasureView initialEntries={entries} />;
 }

@@ -25,4 +25,5 @@ export type ExerciseHistory = {
     estimated1RM: number;
     achievedAt: string;
   } | null;
+  trend: { date: string; weight: number; reps: number; estimated1RM: number }[];
 };

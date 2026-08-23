@@ -21,6 +21,12 @@ export function errorResponse(err: unknown): NextResponse {
         { status: 409 }
       );
     }
+    if (err.code === "P2003") {
+      return NextResponse.json(
+        { error: "Can't delete this — it's still used elsewhere (e.g. logged in a workout)" },
+        { status: 409 }
+      );
+    }
   }
 
   console.error(err);

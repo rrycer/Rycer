@@ -1,8 +1,13 @@
-export default function ExercisesPage() {
-  return (
-    <div className="p-4">
-      <h1 className="text-xl font-bold">Exercises</h1>
-      <p className="mt-2 text-sm text-muted-foreground">Coming next.</p>
-    </div>
-  );
+import { db } from "@/lib/db";
+import { getCurrentUser } from "@/lib/current-user";
+import { ExerciseListView } from "@/components/exercises/exercise-list-view";
+
+export default async function ExercisesPage() {
+  const user = await getCurrentUser();
+  const exercises = await db.exercise.findMany({
+    where: { userId: user.id },
+    orderBy: { name: "asc" },
+  });
+
+  return <ExerciseListView exercises={exercises} />;
 }
