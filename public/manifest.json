@@ -1,0 +1,8 @@
+{
+  "name": "Rycer",
+  "short_name": "Rycer",
+  "start_url": "/workouts",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff"
+}

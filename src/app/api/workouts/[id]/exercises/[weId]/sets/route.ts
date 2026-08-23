@@ -5,9 +5,9 @@ import { getCurrentUser } from "@/lib/current-user";
 import { errorResponse } from "@/lib/api";
 
 const addSetSchema = z.object({
-  weight: z.number().nonnegative().optional(),
+  weight: z.number().nonnegative().nullable().optional(),
   unit: z.enum(["LB", "KG"]).optional(),
-  reps: z.number().int().nonnegative().optional(),
+  reps: z.number().int().nonnegative().nullable().optional(),
   isWarmup: z.boolean().optional(),
   completed: z.boolean().optional(),
 });

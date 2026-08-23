@@ -20,9 +20,10 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 
-  exercises Exercise[]
-  workouts  Workout[]
-  routines  Routine[]
+  exercises   Exercise[]
+  workouts    Workout[]
+  routines    Routine[]
+  bodyWeights BodyWeightEntry[]
 }
 
 // --- Workouts module (the "Strong" replacement) ---------------------------
@@ -48,15 +49,18 @@ model Exercise {
 }
 
 model Workout {
-  id        String   @id @default(cuid())
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  date      DateTime @default(now())
-  name      String? // e.g. "Push Day" — optional
-  notes     String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date        DateTime  @default(now())
+  name        String? // e.g. "Push Day" — optional
+  notes       String?
+  completedAt DateTime? // null while the workout is still in progress
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
+  routineId String? // set when started from a routine, for its "last performed" date
+  routine   Routine?          @relation(fields: [routineId], references: [id], onDelete: SetNull)
   exercises WorkoutExercise[]
 
   @@index([userId, date])
@@ -91,6 +95,7 @@ model Routine {
   updatedAt DateTime @updatedAt
 
   exercises RoutineExercise[]
+  workouts  Workout[]
 
   @@index([userId])
 }
@@ -108,6 +113,21 @@ model RoutineExercise {
 
   @@index([routineId])
   @@index([exerciseId])
+}
+
+// --- Measure module (bodyweight over time) ---------------------------------
+
+model BodyWeightEntry {
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weight    Float
+  unit      WeightUnit @default(LB)
+  date      DateTime   @default(now())
+  notes     String?
+  createdAt DateTime   @default(now())
+
+  @@index([userId, date])
 }
 
 model WorkoutSet {

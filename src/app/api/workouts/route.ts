@@ -11,11 +11,17 @@ const createWorkoutSchema = z.object({
   notes: z.string().trim().max(2000).optional(),
 });
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser();
+    const status = req.nextUrl.searchParams.get("status"); // "active" | "completed"
+
     const workouts = await db.workout.findMany({
-      where: { userId: user.id },
+      where: {
+        userId: user.id,
+        ...(status === "active" && { completedAt: null }),
+        ...(status === "completed" && { completedAt: { not: null } }),
+      },
       orderBy: { date: "desc" },
       include: workoutInclude,
     });

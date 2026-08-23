@@ -9,6 +9,7 @@ const updateWorkoutSchema = z.object({
   date: z.coerce.date().optional(),
   name: z.string().trim().min(1).max(100).nullable().optional(),
   notes: z.string().trim().max(2000).nullable().optional(),
+  completedAt: z.coerce.date().nullable().optional(),
 });
 
 type Params = { params: Promise<{ id: string }> };

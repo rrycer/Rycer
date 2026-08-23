@@ -26,6 +26,7 @@ export async function POST(_req: NextRequest, { params }: Params) {
         data: {
           userId: user.id,
           name: routine.name,
+          routineId: routine.id,
           exercises: {
             create: routine.exercises.map((re) => ({
               exerciseId: re.exerciseId,
