@@ -32,24 +32,52 @@ npm run dev           # http://localhost:3000
 `npm run db:studio` opens Prisma Studio (a GUI for browsing/editing the DB)
 against whatever `DATABASE_URL` you're pointed at.
 
+## Auth
+
+The whole app sits behind one shared passcode (no per-user accounts yet —
+see `src/proxy.ts`, `src/lib/session.ts`). Every request needs `APP_PASSCODE`
+and `SESSION_SECRET` set:
+
+```bash
+# Generate real values for production — never reuse the .env.example ones:
+openssl rand -hex 16   # -> APP_PASSCODE (use a long random string, not a PIN)
+openssl rand -hex 32   # -> SESSION_SECRET
+```
+
 ## Going live: Supabase + Vercel
 
-The app is single-user with no auth yet, so "deploying" just means pointing
-it at a real, always-on Postgres database instead of your laptop:
+1. **Database — Supabase.** Create a free project at
+   [supabase.com](https://supabase.com). Grab the **connection string**
+   (Project Settings → Database → Connection string → URI, using the
+   *pooled* connection for serverless/Vercel).
+2. **Apply the schema.** Set `DATABASE_URL` to that string locally (in
+   `.env`) and run:
+   ```bash
+   npm run db:migrate:deploy   # applies prisma/migrations, no dev prompts
+   npm run db:seed             # creates your user + default exercises/routines
+   ```
+3. **Deploy — Vercel.** Import the GitHub repo at
+   [vercel.com/new](https://vercel.com/new) (it auto-detects Next.js). In the
+   project's environment variables, set:
+   - `DATABASE_URL` — the same Supabase pooled connection string
+   - `APP_PASSCODE` — a long random value (see above), not the dev one
+   - `SESSION_SECRET` — a long random value (see above), not the dev one
+   - `SEED_USER_EMAIL` — only needed if you re-run the seed script against
+     prod and want a different email than the default
 
-1. Create a free project at [supabase.com](https://supabase.com).
-2. In the Supabase dashboard, grab the **connection string** (Project
-   Settings → Database → Connection string → URI, using the *pooled*
-   connection for serverless/Vercel).
-3. Set `DATABASE_URL` to that string — locally in `.env`, and in Vercel's
-   project environment variables when you deploy there.
-4. Run `npm run db:migrate` once against that URL to create the schema, then
-   `npm run db:seed` to create your user row.
-5. Deploy the repo to [Vercel](https://vercel.com/new) (import the GitHub
-   repo, it auto-detects Next.js) with `DATABASE_URL` set in its env vars.
+   `postinstall` runs `prisma generate` automatically on every install, so
+   no extra build configuration is needed.
+4. **Open it on your phone.** Visit the Vercel URL, enter the passcode, and
+   optionally "Add to Home Screen" — the app has a manifest and installs
+   like a native app (PWA).
 
 From then on, `git push` → Vercel redeploys, and your data lives in
 Supabase — reachable from any device, no separate "sync" step needed.
+
+Every page under `src/app/(app)/**` is forced dynamic (`export const
+dynamic = "force-dynamic"` in its layout) since it reads live per-user data —
+don't remove that without understanding it'll start serving stale,
+build-time-frozen data instead.
 
 ## Module structure
 

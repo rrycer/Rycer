@@ -6,11 +6,17 @@ import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { apiFetch } from "@/lib/fetcher";
+import { formatDuration, formatVolume, totalVolume } from "@/lib/workout-stats";
 import type { WorkoutWithDetails } from "@/lib/types";
 
 export function WorkoutDetailView({ workout }: { workout: WorkoutWithDetails }) {
   const router = useRouter();
   const [deleting, setDeleting] = useState(false);
+
+  const volume = totalVolume(workout.exercises);
+  const duration =
+    workout.completedAt &&
+    new Date(workout.completedAt).getTime() - new Date(workout.date).getTime();
 
   async function updateSet(
     weId: string,
@@ -36,8 +42,13 @@ export function WorkoutDetailView({ workout }: { workout: WorkoutWithDetails }) 
       <div>
         <h1 className="text-xl font-bold">{workout.name ?? "Workout"}</h1>
         <p className="text-sm text-muted-foreground">
-          {format(workout.date, "EEEE, MMMM d, yyyy")}
+          {format(new Date(workout.date), "EEEE, MMMM d, yyyy")}
         </p>
+      </div>
+
+      <div className="flex gap-4 text-sm text-muted-foreground">
+        {duration != null && <span>Duration: {formatDuration(duration)}</span>}
+        <span>Volume: {formatVolume(volume)}</span>
       </div>
 
       {workout.notes && <p className="text-sm">{workout.notes}</p>}

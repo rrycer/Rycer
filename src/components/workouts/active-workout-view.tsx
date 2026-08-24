@@ -7,7 +7,9 @@ import { Input } from "@/components/ui/input";
 import { ExerciseBlock } from "@/components/workouts/exercise-block";
 import { AddExerciseSheet } from "@/components/workouts/add-exercise-sheet";
 import { RestTimer } from "@/components/workouts/rest-timer";
+import { LiveDuration } from "@/components/workouts/live-duration";
 import { apiFetch } from "@/lib/fetcher";
+import { formatVolume, totalVolume } from "@/lib/workout-stats";
 import type { ExerciseHistory, WorkoutWithDetails } from "@/lib/types";
 
 export function ActiveWorkoutView({
@@ -125,6 +127,8 @@ export function ActiveWorkoutView({
     router.push("/workouts");
   }
 
+  const volume = totalVolume(workout.exercises);
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <Input
@@ -134,6 +138,15 @@ export function ActiveWorkoutView({
         placeholder="Workout name"
         className="border-none px-0 text-xl font-bold shadow-none focus-visible:ring-0"
       />
+
+      <div className="flex gap-4 text-sm text-muted-foreground">
+        <span>
+          {/* workout.date may be a string after a refetch (JSON) rather than
+              the Date instance the initial server render passes — normalize. */}
+          Duration: <LiveDuration since={new Date(workout.date)} />
+        </span>
+        <span>Volume: {formatVolume(volume)}</span>
+      </div>
 
       <div className="flex flex-col gap-3">
         {workout.exercises.map((we) => (

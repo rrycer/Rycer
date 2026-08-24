@@ -1,6 +1,7 @@
 import { startOfMonth, startOfWeek, subWeeks } from "date-fns";
 import { db } from "@/lib/db";
 import { getCurrentUser } from "@/lib/current-user";
+import { LogoutButton } from "@/components/logout-button";
 
 async function getStats(userId: string) {
   const completedWorkouts = await db.workout.findMany({
@@ -53,6 +54,8 @@ export default async function ProfilePage() {
         <StatTile label="Week streak" value={stats.currentStreak} />
         <StatTile label="All-time workouts" value={stats.totalWorkouts} />
       </div>
+
+      <LogoutButton />
     </div>
   );
 }
